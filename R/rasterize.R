@@ -1,9 +1,9 @@
 #' rasterize simple feature geometries
-#' 
+#'
 #' rasterize simple feature geometries
 #' @export
 #' @param sf object of class \code{sf}
-#' @param template stars object with desired target geometry 
+#' @param template stars object with desired target geometry
 #' @param file temporary file name
 #' @param driver driver for temporary file
 #' @param options character; options vector for \code{GDALRasterize}
@@ -21,7 +21,7 @@
 #'    values = NA_real_))
 #' # Only the left-top corner is part of the grid cell:
 #' sf_extSoftVersion()["GDAL"]
-#' plot(st_rasterize(ls, grd), axes = TRUE, reset = FALSE) # ALL_TOUCHED=FALSE; 
+#' plot(st_rasterize(ls, grd), axes = TRUE, reset = FALSE) # ALL_TOUCHED=FALSE;
 #' plot(ls, add = TRUE, col = "red")
 #' plot(st_rasterize(ls, grd, options = "ALL_TOUCHED=TRUE"), axes = TRUE, reset = FALSE)
 #' plot(ls, add = TRUE, col = "red")
@@ -30,8 +30,8 @@
 #' r = st_rasterize(ls, grd, options = c("MERGE_ALG=ADD", "ALL_TOUCHED=TRUE"))
 #' plot(r, axes = TRUE, reset = FALSE)
 #' plot(ls, add = TRUE, col = "red")
-st_rasterize = function(sf, template = guess_raster(sf, ...) %||% 
-			st_as_stars(st_bbox(sf), values = NA_real_, ...), 
+st_rasterize = function(sf, template = guess_raster(sf, ...) %||%
+			st_as_stars(st_bbox(sf), values = NA_real_, ...),
 		file = tempfile(), driver = "GTiff", options = character(0), ...) {
 	template = st_normalize(template)
 	isn = sapply(sf, is.numeric)
@@ -73,9 +73,9 @@ guess_raster = function(x, ...) {
 		}
 		if (length(ux) * length(uy) <= 2 * nrow(cc)) {
 			bb = st_bbox(x)
-			bb = st_bbox(setNames(c(bb["xmin"] - 0.5 * dux, 
-				bb["ymin"] - 0.5 * duy, 
-				bb["xmax"] + 0.5 * dux, 
+			bb = st_bbox(setNames(c(bb["xmin"] - 0.5 * dux,
+				bb["ymin"] - 0.5 * duy,
+				bb["xmax"] + 0.5 * dux,
 				bb["ymax"] + 0.5 * duy), c("xmin", "ymin", "xmax", "ymax")), crs = st_crs(x))
 			return(st_as_stars(bb, dx = dux, dy = duy))
 		}
@@ -97,6 +97,8 @@ st_as_stars.data.frame = function(.x, ..., dims = coords, xy = dims[1:2], y_decr
 
 	if (missing(dims) && !missing(xy))
 		stop("parameter xy only takes effect when the cube dimensions are set with dims")
+	if (is.character(dims))
+		dims = match(dims, names(.x))
 	if (is.character(xy))
 		xy = match(xy, names(.x))
 	if (any(is.na(xy)))
@@ -126,17 +128,17 @@ st_as_stars.data.frame = function(.x, ..., dims = coords, xy = dims[1:2], y_decr
 			this_dim = this_dim + 1
 		}
 		names(dimensions) = names(.x)[dims]
-	
+
 		raster_xy = if (length(xy) == 2) names(.x)[xy] else c(NA_character_, NA_character_)
 		d = create_dimensions(dimensions, raster = get_raster(dimensions = raster_xy))
 		l = lapply(.x[-xy], function(x) {
 				m = if (is.factor(x))
 						structure(factor(rep(NA_character_, prod(dim(d))), levels = levels(x)),
 							dim = dim(d))
-					else 
+					else
 						array(NA, dim = dim(d))
 				m[index] = x # match order
-				m 
+				m
 			}
 		)
 	} else {
